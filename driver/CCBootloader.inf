@@ -1,0 +1,74 @@
+; Copyright (C) 2010 Keith Packard (keithp@keithp.com)
+; released under GNU General Public License version 2
+; Modified by Fergus Noble for CC Bootloader 2011
+
+[Version]
+Signature	= "$Windows NT$"
+Class   	= Modem
+ClassGUID	= {4D36E96D-E325-11CE-BFC1-08002BE10318}
+Provider	= %Mfg%
+DriverVer	= 08/05/2010,7.1.1.0
+PnpLockDown	= 0
+DriverPackageDisplayName = %DriverName%
+
+[DestinationDirs]
+FakeModemCopyFileSection = 12
+DefaultDestDir	= 12
+
+[ControlFlags]
+
+[Manufacturer]
+%Mfg% = Models, NTx86, NTamd64, NTia64
+
+[Models]
+%CCBootloader%	= CCBootloader.Install, USB\VID_FFFE&PID_000A, CCBootloaderSerial
+
+[Models.NTx86]
+%CCBootloader%	= CCBootloader.Install, USB\VID_FFFE&PID_000A, CCBootloaderSerial
+
+[Models.NTamd64]
+%CCBootloader%	= CCBootloader.Install, USB\VID_FFFE&PID_000A, CCBootloaderSerial
+
+[Models.NTia64]
+%CCBootloader%	= CCBootloader.Install, USB\VID_FFFE&PID_000A, CCBootloaderSerial
+
+;----------------------------------------------------------------------------
+; Installation sections
+;----------------------------------------------------------------------------
+
+[CCBootloader.Install.NT]
+include		= mdmcpq.inf
+CopyFiles	= FakeModemCopyFileSection
+AddReg		= All.AddReg, Modem.AddReg, Uninstall.AddReg
+
+[CCBootloader.Install.NT.Services]
+include		= mdmcpq.inf
+AddService	= usbser, 0x00000000, LowerFilter_Service_Inst
+
+[CCBootloader.Install.NT.HW]
+include		= mdmcpq.inf
+AddReg		= LowerFilterAddReg
+
+;----------------------------------------------------------------------------
+; AddReg sections
+;----------------------------------------------------------------------------
+
+[All.AddReg]
+HKR,,FriendlyDriver,,		Unimodem.vxd
+HKR,,DevLoader,,		*vcomm
+HKR,,ConfigDialog,,		modemui.dll
+HKR,,EnumPropPages,,		"modemui.dll,EnumPropPages"
+HKR,,PortSubClass, 1,		02
+HKR,,DeviceType, 1,		01
+
+[Modem.AddReg]
+HKR,, Properties, 1, C0,01,00,00, 00,00,00,00, FF,00,00,00, 07,00,00,00, 0F,00,00,00, F7,0F,00,00, 00,84,03,00, C0,DA,00,00
+
+[Uninstall.AddReg]
+HKLM,Software\Microsoft\Windows\CurrentVersion\Uninstall\%CCBootloader%,DisplayName,,"%CCBootloader%"
+
+[Strings]
+Mfg		= "JobyGPS"
+CCBootloader	= "CCBootloader"
+DriverName	= "CC1111 Bootloader Device Driver"
+
