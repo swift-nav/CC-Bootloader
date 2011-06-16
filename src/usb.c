@@ -43,7 +43,7 @@ void usb_isr() __interrupt 6
 {
   USBIF = 0;
   usb_iif |= USBIIF;
-  usb_periodic();
+  usb_ep0();
 
   if (USBCIF & USBCIF_RSTIF)
     usb_set_interrupts();
@@ -255,7 +255,7 @@ static void usb_ep0_setup()
 
 // End point 0 receives all of the control messages.
 // This function must be called periodically to process ep0 messages.
-static void usb_ep0_periodic()
+static void usb_ep0()
 {
   __xdata uint8_t cs0;
 
