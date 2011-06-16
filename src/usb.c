@@ -422,3 +422,18 @@ void usb_init()
 	usb_enable();
 }
 
+void usb_readline(char* buff) {
+  char c;
+  while ((c = usb_getchar()) != '\n') {
+    *buff++ = c;
+  }
+  *buff = 0;
+}
+
+void usb_putstr(char* buff) {
+  while (*buff) {
+    usb_putchar(*buff++);
+  }
+  usb_flush();
+}
+

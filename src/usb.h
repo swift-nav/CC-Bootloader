@@ -30,6 +30,9 @@ char usb_getchar();
 void usb_putchar(char c);
 void usb_flush();
 
+void usb_putstr(char* buff);
+void usb_readline(char* buff);
+
 // End external interface
 
 // USB interrupt handler
