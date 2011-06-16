@@ -40,7 +40,6 @@ PAOM=$(PROGS:.hex=)
 	$(CC) -c $(CFLAGS) -o$*.rel $<
 
 all: $(PROGS)
-#	cp $(PROGS) ../
 
 CCBootloader.hex: $(REL) Makefile
 	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader.hex $(REL)
@@ -48,5 +47,4 @@ CCBootloader.hex: $(REL) Makefile
 clean:
 	rm -f $(ADB) $(ASM) $(LNK) $(LST) $(REL) $(RST) $(SYM)
 	rm -f $(PROGS) $(PCDB) $(PLNK) $(PMAP) $(PMEM) $(PAOM)
-#	cd ../; rm -f $(PROGS)
 
