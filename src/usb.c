@@ -27,31 +27,23 @@ static __xdata uint16_t usb_out_bytes;
 static __xdata uint8_t  usb_iif;
 static __xdata uint8_t  usb_running;
 
-static void usb_set_interrupts (void)
+static void usb_set_interrupts()
 {
   // IN interrupts on the control an IN endpoints
   USBIIE = (1 << USB_CONTROL_EP) | (1 << USB_IN_EP);
-
   // OUT interrupts on the OUT endpoint
   USBOIE = (1 << USB_OUT_EP);
-
   // Only care about reset
   USBCIE = USBCIE_RSTIE;
 }
 
 // This interrupt is shared with port 2,
 // so when we hook that up, fix this
-void usb_isr (void) __interrupt 6
+void usb_isr() __interrupt 6
 {
   USBIF = 0;
   usb_iif |= USBIIF;
-  if (usb_iif & 1)
-    ao_wakeup(&usb_task);
-  if (usb_iif & (1 << USB_IN_EP))
-    ao_wakeup(&usb_in_bytes);
-
-  if (USBOIF & (1 << USB_OUT_EP))
-    ao_wakeup(&ao_stdin_ready);
+  usb_periodic();
 
   if (USBCIF & USBCIF_RSTIF)
     usb_set_interrupts();
@@ -74,7 +66,7 @@ __xdata uint8_t *__xdata usb_ep0_out_data;
 __xdata uint8_t usb_configuration;
 
 // Send an IN data packet
-static void usb_ep0_flush(void)
+static void usb_ep0_flush()
 {
   __xdata uint8_t this_len;
   __xdata uint8_t cs0;
@@ -124,7 +116,7 @@ static void usb_get_descriptor(uint16_t value)
 }
 
 // Read data from the ep0 OUT fifo
-static void usb_ep0_fill (void)
+static void usb_ep0_fill()
 {
   __xdata uint8_t len;
 
@@ -149,7 +141,7 @@ void usb_set_address (uint8_t address)
   while (USBADDR & 0x80) {}
 }
 
-static void usb_set_configuration (void)
+static void usb_set_configuration()
 {
   // Set the IN max packet size, double buffered
   USBINDEX = USB_IN_EP;
@@ -162,7 +154,7 @@ static void usb_set_configuration (void)
   USBCSOH = USBCSOH_OUT_DBL_BUF;
 }
 
-static void usb_ep0_setup (void)
+static void usb_ep0_setup()
 {
   // Pull the setup packet out of the fifo
   usb_ep0_out_data = (__xdata uint8_t *) &usb_setup;
@@ -262,19 +254,16 @@ static void usb_ep0_setup (void)
 }
 
 // End point 0 receives all of the control messages.
-static void usb_ep0 (void)
+// This function must be called periodically to process ep0 messages.
+static void usb_ep0_periodic()
 {
   __xdata uint8_t cs0;
 
-  usb_ep0_state = USB_EP0_IDLE;
-  while (1) {
-    __critical while (1) {
-      if (usb_iif & 1) {
-        usb_iif &= ~1;
-        break;
-      }
-      ao_sleep(&ao_usb_task);
-    }
+  // If the ep0 flag has been set by the USB interrupt then do some processing
+  if (usb_iif & 1)
+  {
+    usb_iif &= ~1; // clear flag
+    
     USBINDEX = 0;
     cs0 = USBCS0;
     if (cs0 & USBCS0_SETUP_END) {
@@ -311,26 +300,27 @@ static void usb_ep0 (void)
 }
 
 // Wait for a free IN buffer
-static void usb_in_wait (void)
+static void usb_in_wait()
 {
   while (1) {
     USBINDEX = USB_IN_EP;
     if ((USBCSIL & USBCSIL_INPKT_RDY) == 0)
       break;
-    ao_sleep(&usb_in_bytes);
+    while (!(usb_iif & (1 << USB_IN_EP))) {}
   }
 }
 
 // Send the current IN packet
-static void usb_in_send (void)
+static void usb_in_send()
 {
+  P1_1 = 1;
   USBINDEX = USB_IN_EP;
   USBCSIL |= USBCSIL_INPKT_RDY;
   usb_in_bytes_last = usb_in_bytes;
   usb_in_bytes = 0;
 }
 
-void usb_flush (void) __critical
+void usb_flush()
 {
   if (!usb_running)
     return;
@@ -343,7 +333,7 @@ void usb_flush (void) __critical
   }
 }
 
-void usb_putchar (char c) __critical __reentrant
+void usb_putchar(char c) __reentrant
 {
   if (!usb_running)
     return;
@@ -356,18 +346,18 @@ void usb_putchar (char c) __critical __reentrant
     usb_in_send();
 }
 
-char usb_pollchar (void) __critical
+char usb_pollchar()
 {
   char c;
   if (usb_out_bytes == 0) {
     USBINDEX = USB_OUT_EP;
     if ((USBCSOL & USBCSOL_OUTPKT_RDY) == 0)
-      return AO_READ_AGAIN;
+      return USB_READ_AGAIN;
     usb_out_bytes = (USBCNTH << 8) | USBCNTL;
     if (usb_out_bytes == 0) {
       USBINDEX = USB_OUT_EP;
       USBCSOL &= ~USBCSOL_OUTPKT_RDY;
-      return AO_READ_AGAIN;
+      return USB_READ_AGAIN;
     }
   }
   --usb_out_bytes;
@@ -379,15 +369,17 @@ char usb_pollchar (void) __critical
   return c;
 }
 
-char usb_getchar (void) __critical
+char usb_getchar()
 {
   char c;
-  while ((c = usb_pollchar()) == AO_READ_AGAIN)
-    ao_sleep(&ao_stdin_ready);
+  while ((c = usb_pollchar()) == USB_READ_AGAIN)
+  {
+    while (!(USBOIF & (1 << USB_OUT_EP))) {}
+  }
   return c;
 }
 
-void usb_enable (void)
+void usb_enable()
 {
   // Turn on the USB controller
   SLEEP |= SLEEP_USB_EN;
@@ -402,9 +394,10 @@ void usb_enable (void)
   USBCIF = 0;
   USBOIF = 0;
   USBIIF = 0;
+  USBIF = 0;
 }
 
-void usb_disable (void)
+void usb_disable()
 {
   // Disable USB interrupts
   USBIIE = 0;
@@ -419,5 +412,13 @@ void usb_disable (void)
 
   // Turn off the USB controller
   SLEEP &= ~SLEEP_USB_EN;
+}
+
+void usb_init()
+{
+  // Init ep0
+	usb_ep0_state = USB_EP0_IDLE;
+	usb_iif = 0;
+	usb_enable();
 }
 

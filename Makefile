@@ -18,8 +18,9 @@ CFLAGS += --debug
 endif
 
 SRC = \
-	src/usb.c
-#	src/main.c
+	src/main.c \
+	src/usb.c \
+	src/usb_descriptors.c 
 
 ADB=$(SRC:.c=.adb)
 ASM=$(SRC:.c=.asm)
