@@ -99,7 +99,7 @@ void ihx_readline(char line[]) {
 
 void ihx_write(char line[]) {
   // :ccaaaattxxxxss
-  uint8_t byte_count, record_type, checksum, sum, b;
+  uint8_t byte_count, record_type, i, b;
   uint16_t address;
   
   byte_count = hex8(&line[1]);
