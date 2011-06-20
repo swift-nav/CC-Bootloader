@@ -37,18 +37,6 @@ static void usb_set_interrupts()
   USBCIE = USBCIE_RSTIE;
 }
 
-// This interrupt is shared with port 2,
-// so when we hook that up, fix this
-void usb_isr() __interrupt 6
-{
-  USBIF = 0;
-  usb_iif |= USBIIF;
-  usb_ep0();
-
-  if (USBCIF & USBCIF_RSTIF)
-    usb_set_interrupts();
-}
-
 struct usb_setup {
   uint8_t   dir_type_recip;
   uint8_t   request;
@@ -297,6 +285,18 @@ static void usb_ep0()
       }
     }
   }
+}
+
+// This interrupt is shared with port 2,
+// so when we hook that up, fix this
+void usb_isr() __interrupt 6
+{
+  USBIF = 0;
+  usb_iif |= USBIIF;
+  usb_ep0();
+
+  if (USBCIF & USBCIF_RSTIF)
+    usb_set_interrupts();
 }
 
 // Wait for a free IN buffer
