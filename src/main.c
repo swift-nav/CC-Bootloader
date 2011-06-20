@@ -54,10 +54,18 @@ void delay (unsigned char n) {
 		  while (--j != 0)
 			  nop();
 }
+
+/*
+void jump_to_user() {
+  __asm
+    ljmp USER_CODE_BASE
+  __endasm;
+}
+*/
  
 void main ()
 {
-  char c;
+  __xdata char buff[100];
   
   clock_init();
   
@@ -76,9 +84,12 @@ void main ()
   
   while (1) 
   {
-    c = usb_getchar();
-    usb_putchar(c);
+    ihx_readline(buff);
+    usb_putchar(ihx_check_line(buff) + '0');
+    usb_putchar('\n');
     usb_flush();
-    //delay(2);
+    //usb_putstr(buff);
 	}
+	
+	while (1) {}
 }

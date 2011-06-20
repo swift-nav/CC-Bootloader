@@ -20,6 +20,7 @@ endif
 SRC = \
 	src/main.c \
 	src/usb.c \
+	src/intel_hex.c \
 	src/usb_descriptors.c 
 
 ADB=$(SRC:.c=.adb)
