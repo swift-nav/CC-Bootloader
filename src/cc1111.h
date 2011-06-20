@@ -2,6 +2,7 @@
    Register Declarations for the ChipCon CC1111 Processor Range
    
    Modified 2011 by Fergus Noble to update depreciated sdcc keywords
+   and add some missing sfr definitions.
 
    Copyright © 2008 Keith Packard <keithp@keithp.com>
 
@@ -41,6 +42,21 @@
 #define _CC1111_H_
 #include <cc1110.h>
 #include <stdint.h>
+
+// Flash controller
+
+__sfr __at 0xAB FWT;    // Flash Write Timing
+__sfr __at 0xAC FADDRL; // Flash Address Low Byte
+__sfr __at 0xAD FADDRH; // Flash Address High Byte
+__sfr __at 0xAE FCTL;   // Flash Control
+__sfr __at 0xAF FWDATA; // Flash Write Data
+
+// FCTL (0xAE) - Flash Control
+#define FCTL_BUSY   0x80
+#define FCTL_SWBSY  0x40
+#define FCTL_CONTRD 0x10
+#define FCTL_WRITE  0x02
+#define FCTL_ERASE  0x01
 
 __sfr __at 0xA8 IEN0;		/* Interrupt Enable 0 Register */
 
