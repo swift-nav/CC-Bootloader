@@ -17,16 +17,10 @@
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA.
  */
 
-#include <stdio.h>
-#include <string.h>
 #include "cc1111.h"
+#include "main.h"
 #include "usb.h"
-
-#define LED_PIN 0x08
-
-void putchar(char c) {
-  usb_putchar(c);
-}
+#include "intel_hex.h"
 
 void clock_init()
 {
@@ -44,7 +38,11 @@ void clock_init()
 	      ) {}
 }
 
-#define nop()	__asm nop __endasm;
+#ifdef STDIO
+void putchar(char c) {
+    usb_putchar(c);
+}
+#endif
  
 void delay (unsigned char n) {
 	unsigned char i = 0;
