@@ -101,7 +101,7 @@ void bootloader_main ()
           ihx_write(buff);
           break;
         case IHX_RECORD_EOF:
-          usb_putstr("Jumping to user code\n");
+          usb_putstr("0\nJumping to user code\n");
           jump_to_user();
           break;
         default:
