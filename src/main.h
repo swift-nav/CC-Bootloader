@@ -22,6 +22,7 @@
 
 // The address of the start of the user code section
 // This must be a multiple of 1kb to fit on a flash page boundary
+// !!! NOTE: at the moment you must also change this in start.asm IVT !!!
 #define USER_CODE_BASE (4*1024)
 #define USER_FIRST_PAGE (USER_CODE_BASE/1024)
 
@@ -31,7 +32,7 @@
 #define FLASH_PAGES (FLASH_SIZE/1024)
 
 // Useful for printf etc. but uses a bunch of code space
-#define STDIO
+//#define STDIO
 #ifdef STDIO
 #include <stdio.h>
 #else
@@ -40,5 +41,7 @@
 #endif
 
 #define nop()	__asm nop __endasm;
+
+extern uint8_t bootloader_running;
 
 #endif // _MAIN_H_

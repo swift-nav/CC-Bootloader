@@ -22,6 +22,8 @@
 #include "usb.h"
 #include "intel_hex.h"
 
+uint8_t bootloader_running = 1;
+
 void clock_init()
 {
 	// Switch system clock to crystal oscilator
@@ -55,15 +57,19 @@ void delay (unsigned char n) {
 			  nop();
 }
 
-/*
 void jump_to_user() {
+  // Disable all interrupts
+  EA = 0;
+  IEN0 = IEN1 = IEN2 = 0;
+  // Flag bootloader not running
+  bootloader_running = 0;
+  // Jump to user code
   __asm
-    ljmp USER_CODE_BASE
+    ljmp #USER_CODE_BASE
   __endasm;
 }
-*/
- 
-void main ()
+
+void bootloader_main ()
 {
   __xdata char buff[100];
   uint8_t ihx_status;
@@ -86,14 +92,26 @@ void main ()
   while (1) 
   {
     ihx_readline(buff);
+    
     ihx_status = ihx_check_line(buff);
+    
     if (ihx_status == IHX_OK) {
-      ihx_write(buff);
+      switch (ihx_record_type(buff)) {
+        case IHX_RECORD_DATA:
+          ihx_write(buff);
+          break;
+        case IHX_RECORD_EOF:
+          usb_putstr("Jumping to user code\n");
+          jump_to_user();
+          break;
+        default:
+          // Return the error code for unknown type in this case too
+          usb_putchar(IHX_BAD_RECORD_TYPE + '0');
+          usb_flush();
+          break;
+      }
     }
     usb_putchar(ihx_status + '0');
     usb_flush();
-    //usb_putstr(buff);
 	}
-	
-	while (1) {}
 }
