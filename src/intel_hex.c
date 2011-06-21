@@ -63,19 +63,20 @@ uint8_t ihx_check_line(char line[]) {
     return IHX_RECORD_TOO_LONG;
   
   checksum = hex8(&line[9 + 2*byte_count]);
-  
+
   if (record_type > 1)
     return IHX_BAD_RECORD_TYPE;
     
-  if (address > USER_CODE_BASE || address < FLASH_SIZE)
+  if (address < USER_CODE_BASE || address > FLASH_SIZE)
    return IHX_BAD_ADDRESS;
    
   sum = 0;
   i = 0;
-  for (i=0; i<byte_count+4; i++)
+  for (i=0; i<byte_count+5; i++) {
     sum += hex8(&line[1 + i*2]);
-
-  if ((uint8_t)(sum + checksum) != 0)
+  }
+  
+  if (sum != 0)
     return IHX_BAD_CHECKSUM;
     
   return IHX_OK;
@@ -91,7 +92,7 @@ void ihx_readline(char line[]) {
   
   // Read until newline
   len = 1;
-  while (len < IHX_MAX_LEN+13 && (c = usb_getchar()) != '\n') {
+  while (len < (IHX_MAX_LEN*2)+13 && (c = usb_getchar()) != '\n') {
     line[len++] = c;
   }
   line[len+1] = 0;
