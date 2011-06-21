@@ -63,7 +63,7 @@ uint8_t ihx_check_line(char line[]) {
   if (byte_count > IHX_MAX_LEN)
     return IHX_RECORD_TOO_LONG;
   
-  checksum = hex8(&line[9 + 2*byte_count]);
+  checksum = ihx_data_byte(line, byte_count);
 
   if (record_type > 1)
     return IHX_BAD_RECORD_TYPE;
@@ -85,6 +85,10 @@ uint8_t ihx_check_line(char line[]) {
 
 uint8_t ihx_record_type(char line[]) {
   return hex8(&line[7]);
+}
+
+uint8_t ihx_data_byte(char line[], uint8_t n) {
+  return hex8(&line[9 + n*2]);
 }
 
 void ihx_readline(char line[]) {
@@ -117,7 +121,7 @@ void ihx_write(char line[]) {
     case IHX_RECORD_DATA:
       buff[0] = 0xFF; // Padding in case the flash start address is not even.
       for (i=0; i<byte_count; i++)
-        buff[i+1] = hex8(&line[9 + i*2]);
+        buff[i+1] = ihx_data_byte(line, i);
       buff[byte_count+1] = 0xFF; // If there are not an even no. of bytes, pad with 0xFF to preserve flash.
       
       if (address & 1) {
