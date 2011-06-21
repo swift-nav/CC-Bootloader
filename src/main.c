@@ -74,6 +74,13 @@ void bootloader_main ()
   __xdata char buff[100];
   uint8_t ihx_status;
   
+  /*
+  // Check for USB +5V, if not present go straight to user code
+  PxDIR &= ~y;
+  if (!Px_y)
+    jump_to_user();
+  */
+  
   clock_init();
   
   // Setup LED and turn it off
@@ -104,6 +111,13 @@ void bootloader_main ()
           usb_putstr("0\nJumping to user code\n");
           jump_to_user();
           break;
+        case IHX_RECORD_RESET:
+          // Reset record will reset the page erase map which usually ensures each page is only
+          // erased once, allowing for random writes but preventing overwriting of data already written
+          // this session.
+          flash_reset();
+          usb_putchar('0');
+          usb_flush();
         default:
           // Return the error code for unknown type in this case too
           usb_putchar(IHX_BAD_RECORD_TYPE + '0');
