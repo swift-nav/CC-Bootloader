@@ -66,6 +66,7 @@ void jump_to_user() {
 void main ()
 {
   __xdata char buff[100];
+  uint8_t ihx_status;
   
   clock_init();
   
@@ -85,8 +86,11 @@ void main ()
   while (1) 
   {
     ihx_readline(buff);
-    usb_putchar(ihx_check_line(buff) + '0');
-    usb_putchar('\n');
+    ihx_status = ihx_check_line(buff);
+    if (ihx_status == IHX_OK) {
+      ihx_write(buff);
+    }
+    usb_putchar(ihx_status + '0');
     usb_flush();
     //usb_putstr(buff);
 	}

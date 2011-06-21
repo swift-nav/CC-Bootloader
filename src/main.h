@@ -22,15 +22,16 @@
 
 // The address of the start of the user code section
 // This must be a multiple of 1kb to fit on a flash page boundary
-#define USER_CODE_BASE (3*1024)
+#define USER_CODE_BASE (4*1024)
 #define USER_FIRST_PAGE (USER_CODE_BASE/1024)
 
 // Change to match the CC1111 part you are using
-#define FLASH_SIZE (32*1024)
+#define FLASH_SIZE 0x8000
+//(32*1024)
 #define FLASH_PAGES (FLASH_SIZE/1024)
 
 // Useful for printf etc. but uses a bunch of code space
-//#define STDIO
+#define STDIO
 #ifdef STDIO
 #include <stdio.h>
 #else

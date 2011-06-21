@@ -21,6 +21,7 @@
 #include "intel_hex.h"
 #include "usb.h"
 #include "main.h"
+#include "flash.h"
 
 uint8_t hex4(char c) {
   // Converts a character representation of a hexadecimal nibble
@@ -100,8 +101,9 @@ void ihx_readline(char line[]) {
 
 void ihx_write(char line[]) {
   // :ccaaaattxxxxss
-  uint8_t byte_count, record_type, i, b;
+  uint8_t byte_count, record_type, i;
   uint16_t address;
+  __xdata uint8_t buff[65];
   
   byte_count = hex8(&line[1]);
   address = hex16(&line[3]);
@@ -110,7 +112,12 @@ void ihx_write(char line[]) {
   switch (record_type) {
     case IHX_RECORD_DATA:
       for (i=0; i<byte_count; i++)
-        b = hex8(&line[9 + i*2]);
+        buff[i] = hex8(&line[9 + i*2]);
+      buff[byte_count] = 0xFF; // If there are not an even no. of bytes, pad with 0xFF to preserve flash.
+      
+      // (byte_count+1)/2 == number of 16-bit words to transfer, rounded up
+      flash_check_erase_and_write((uint16_t*)buff, (byte_count+1)/2, address);
+      
       break;
     case IHX_RECORD_EOF:
       break;
