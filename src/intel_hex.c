@@ -115,12 +115,20 @@ void ihx_write(char line[]) {
   
   switch (record_type) {
     case IHX_RECORD_DATA:
+      buff[0] = 0xFF; // Padding in case the flash start address is not even.
       for (i=0; i<byte_count; i++)
-        buff[i] = hex8(&line[9 + i*2]);
-      buff[byte_count] = 0xFF; // If there are not an even no. of bytes, pad with 0xFF to preserve flash.
+        buff[i+1] = hex8(&line[9 + i*2]);
+      buff[byte_count+1] = 0xFF; // If there are not an even no. of bytes, pad with 0xFF to preserve flash.
       
-      // (byte_count+1)/2 == number of 16-bit words to transfer, rounded up
-      flash_check_erase_and_write((uint16_t*)buff, (byte_count+1)/2, address);
+      if (address & 1) {
+        // Odd start address
+        // (byte_count+1)/2 == number of 16-bit words to transfer, rounded up
+        flash_check_erase_and_write((uint16_t*)buff, (byte_count+2)/2, address-1);
+      } else {
+        // Even start address
+        // (byte_count+1)/2 == number of 16-bit words to transfer, rounded up
+        flash_check_erase_and_write((uint16_t*)(buff+1), (byte_count+1)/2, address);
+      }
       
       break;
     case IHX_RECORD_EOF:
