@@ -68,7 +68,7 @@ uint8_t ihx_check_line(char line[]) {
   if (record_type > 1)
     return IHX_BAD_RECORD_TYPE;
     
-  if (address < USER_CODE_BASE || address > FLASH_SIZE)
+  if (record_type != IHX_RECORD_EOF && (address < USER_CODE_BASE || address > FLASH_SIZE))
    return IHX_BAD_ADDRESS;
    
   sum = 0;
