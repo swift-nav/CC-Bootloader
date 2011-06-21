@@ -83,6 +83,10 @@ uint8_t ihx_check_line(char line[]) {
   return IHX_OK;
 }
 
+uint8_t ihx_record_type(char line[]) {
+  return hex8(&line[7]);
+}
+
 void ihx_readline(char line[]) {
   char c;
   uint8_t len;

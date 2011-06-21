@@ -41,5 +41,6 @@ uint16_t hex16(char s[]);
 uint8_t ihx_check_line(char line[]);
 void ihx_readline(char line[]);
 void ihx_write(char line[]);
+uint8_t ihx_record_type(char line[]);
 
 #endif // _INTEL_HEX_H_
