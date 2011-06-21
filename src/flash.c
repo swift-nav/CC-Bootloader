@@ -68,6 +68,7 @@ void flash_write_trigger() {
     ; Put our trigger instruction in the HOME segment (shared with some startup code)
     ; where it wont move around too much
     .area HOME (CODE)
+    ; Comment or uncomment these lines to adjust if you change the start.asm code
     nop               ; Padding to get onto 16-bit boundary
   flash_write_trigger_instruction:
     orl _FCTL, #0x02  ; FCTL |=  FCTL_ERASE
