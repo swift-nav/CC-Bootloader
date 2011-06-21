@@ -1,0 +1,5 @@
+*.asm
+*.lst
+*.rel
+*.rst
+*.sym
