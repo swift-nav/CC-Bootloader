@@ -313,7 +313,6 @@ static void usb_in_wait()
 // Send the current IN packet
 static void usb_in_send()
 {
-  P1_1 = 1;
   USBINDEX = USB_IN_EP;
   USBCSIL |= USBCSIL_INPKT_RDY;
   usb_in_bytes_last = usb_in_bytes;
