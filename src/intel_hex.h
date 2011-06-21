@@ -34,6 +34,29 @@
 #define IHX_RECORD_DATA 0x00
 #define IHX_RECORD_EOF  0x01
 
+// Custom record types used to implement some extra bootloader functionality.
+
+// Reset record will reset the page erase map which usually ensures each page is only
+// erased once, allowing for random writes but preventing overwriting of data already written
+// this session.
+// :00000022DE
+#define IHX_RECORD_RESET  0x22
+
+// Erases all of the user code flash pages
+// :00000023DD
+#define IHX_RECORD_ERASE_ALL  0x23
+
+// Erases a single page of the user code flash
+// :01000024xxyy
+// xx - Page number, yy - Checksum
+#define IHX_RECORD_ERASE_PAGE  0x24
+
+// Reads back a section of flash in Intel HEX format
+// :04xxxx24yyyyzz
+// xxxx - Start address, yyyy - Num bytes to read, zz - Checksum
+#define IHX_RECORD_READ  0x25
+
+
 uint8_t hex4(char c);
 uint8_t hex8(char s[]);
 uint16_t hex16(char s[]);

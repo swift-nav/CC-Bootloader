@@ -65,10 +65,11 @@ uint8_t ihx_check_line(char line[]) {
   
   checksum = ihx_data_byte(line, byte_count);
 
-  if (record_type > 1)
+  if (record_type > 0x01 && (record_type < 0x22 || record_type > 0x25))
     return IHX_BAD_RECORD_TYPE;
     
-  if (record_type != IHX_RECORD_EOF && (address < USER_CODE_BASE || address > FLASH_SIZE))
+  if ((record_type == IHX_RECORD_DATA || record_type == IHX_RECORD_READ) && \
+      (address < USER_CODE_BASE || address > FLASH_SIZE))
    return IHX_BAD_ADDRESS;
    
   sum = 0;
