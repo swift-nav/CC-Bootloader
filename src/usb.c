@@ -24,7 +24,7 @@
 static __xdata uint16_t usb_in_bytes;
 static __xdata uint16_t usb_in_bytes_last;
 static __xdata uint16_t usb_out_bytes;
-static __xdata uint8_t  usb_iif;
+volatile static __xdata uint8_t  usb_iif;
 static __xdata uint8_t  usb_running;
 
 static void usb_set_interrupts()
