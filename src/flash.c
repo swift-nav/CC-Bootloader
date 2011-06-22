@@ -165,3 +165,10 @@ void flash_reset() {
   erased_page_flags = 0;
 }
 
+void flash_erase_all_user() {
+  // Erase all user flash pages
+  uint8_t i;
+  for (i=USER_FIRST_PAGE; i<FLASH_PAGES; i++)
+    flash_erase_page(i);
+}
+

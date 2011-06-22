@@ -39,5 +39,7 @@ void flash_check_and_erase(uint8_t page);
 void flash_check_erase_and_write(uint16_t buff[], uint16_t len, uint16_t flash_addr);
 // Reset record of which pages have been erased
 void flash_reset();
+// Erase all user flash pages
+void flash_erase_all_user();
 
 #endif // _FLASH_H_
