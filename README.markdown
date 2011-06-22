@@ -86,5 +86,9 @@ You must reflect this change in several places:
 Hopefully step three will not be needed in the future when I find a better
 way to implement this part of the code.
 
+If you want the bootloader to only be invoked under certain conditions, e.g.
+the presence of USB power then please modify the `want_bootloader` function
+in `main.c`
+
 
 

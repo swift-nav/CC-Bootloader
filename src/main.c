@@ -161,18 +161,29 @@ void timer1_isr_forward() __naked {
   #endif
 }
 
+uint8_t want_bootloader() {
+  // Check if we want to the bootloader to run
+  // Here is the place to check for things like USB power and jump straight to
+  // user code under some conditions.
+  
+  /*
+  // Check for USB +5V, if not present go straight to user code
+  PxDIR &= ~y;
+  if (!Px_y)
+    return 0;
+  */
+  
+  return 1;
+}
+
 void bootloader_main ()
 {
   __xdata char buff[100];
   uint8_t ihx_status;
   uint16_t read_start_addr, read_len;
   
-  /*
-  // Check for USB +5V, if not present go straight to user code
-  PxDIR &= ~y;
-  if (!Px_y)
+  if (!want_bootloader())
     jump_to_user();
-  */
   
   clock_init();
   
