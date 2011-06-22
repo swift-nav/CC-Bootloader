@@ -6,7 +6,7 @@
 CC = sdcc
 AS = sdas8051
 
-CFLAGS = --model-small --opt-code-speed
+CFLAGS = --model-small --opt-code-size
 
 LDFLAGS_FLASH = \
 	--out-fmt-ihx \
