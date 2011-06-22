@@ -26,13 +26,13 @@ __interrupt_vect:
 	.ds 5
 	ljmp #(0x1400+0x2B)
 	.ds	5
-	ljmp	usb_isr_forward
+	ljmp usb_isr_forward
 	.ds	5
 	ljmp #(0x1400+0x3B)
 	.ds	5
 	ljmp #(0x1400+0x43)
 	.ds	5
-	ljmp #(0x1400+0x4B)
+	ljmp _timer1_isr_forward ; defined in main.c
 	.ds	5
 	ljmp #(0x1400+0x53)
 	.ds	5

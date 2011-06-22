@@ -34,10 +34,10 @@ void clock_init()
 
 	// Crank up the timer tick and system clock speed
 	CLKCON = ((CLKCON & ~(CLKCON_TICKSPD_MASK | CLKCON_CLKSPD_MASK)) |
-		  (CLKCON_TICKSPD_1 | CLKCON_CLKSPD_1));
+		  (CLKCON_TICKSPD_1_128 | CLKCON_CLKSPD_1));
 
 	while ((CLKCON & (CLKCON_TICKSPD_MASK|CLKCON_CLKSPD_MASK)) !=
-	       (CLKCON_TICKSPD_1 | CLKCON_CLKSPD_1)
+	       (CLKCON_TICKSPD_1_128 | CLKCON_CLKSPD_1)
 	      ) {}
 }
 
@@ -69,6 +69,11 @@ void jump_to_user() {
   // Disable all interrupts
   EA = 0;
   IEN0 = IEN1 = IEN2 = 0;
+  
+  // Bring down the USB link
+  P1_0 = 0;
+  P1DIR &= ~1;
+  
   // Flag bootloader not running
   bootloader_running = 0;
   
@@ -85,9 +90,75 @@ void jump_to_user() {
   }
 }
 
+#ifdef TIMER
+void setup_timer1() {
+  // Clear Timer 1 channel 1 and overflow interrupt flag
+  // CPU interrupt flag (IRCON) for Timer 1 is cleared automatically by hardware.
+  T1CTL &= ~T1CTL_OVFIF;
+  
+  // Enable Timer 1 interrupts by setting [IEN1.T1IE=1]
+  IEN1 |= IEN1_T1IE;
+  
+  T1CC0H = TIMER_TIMEOUT;
+  T1CC0L = 0x00;
+  
+  // set Timer 1 to modulo mode
+  T1CTL = TxCTL_OVFIM | TxCTL_DIV_128 | TxCTL_MODE_MODULO;
+}
+#endif
+
+#ifdef TIMER
+void disable_timer1() {
+  // Disable Timer 1 interrupt
+  IEN1 &= ~IEN1_T1IE;
+}
+#endif
+
+#ifdef TIMER
+void timer1_isr() __naked {
+  T1CTL &= ~T1CTL_OVFIF;
+  
+  // We need to issue a RETI instruction to
+  // get out of interrupt mode. We push the
+  // address of a dummy label onto the stack
+  // to spoof the return address of the RETI
+  // instruction.
   __asm
-    ljmp #USER_CODE_BASE
+    ; Push address of label just past RETI 
+    mov a, #<silly_reti ; Low byte first
+    push acc
+    mov a, #>silly_reti ; High byte
+    push acc
+    ; Issue RETI to get out of interrupt
+    ; Should return to silly_reti
+    reti
+  silly_reti:
   __endasm;
+  
+  // Now go to user code, don't worry about the fact we have
+  // frigged the stack, the user code will just reset it anyway.
+  jump_to_user();
+}
+#endif
+
+void timer1_isr_forward() __naked {
+  #ifdef TIMER
+  __asm
+  	push acc
+  	mov	a, _bootloader_running
+  	jnz	timer1_isr_forward_bootloader
+  	; Bootloader not running, jump into the payload ISR
+  	pop acc
+  	ljmp #(0x1400+0x4B)
+  timer1_isr_forward_bootloader:
+  	pop acc
+  	ljmp	_timer1_isr
+  __endasm;
+  #else
+  __asm
+  	ljmp #(0x1400+0x4B)
+  __endasm;  
+  #endif
 }
 
 void bootloader_main ()
@@ -109,6 +180,11 @@ void bootloader_main ()
   P1DIR |= 2;
   P1_1 = 0;
   
+  // Setup timer if enabled
+  #ifdef TIMER
+  setup_timer1();
+  #endif
+  
   usb_init();
   
   // Enable interrupts
@@ -116,11 +192,16 @@ void bootloader_main ()
   
   // Bring up the USB link
 	P1DIR |= 1;
-	P1 |= 1;
+	P1_0 = 1;
   
   while (1) 
   {
     ihx_readline(buff);
+    
+    // Got something over USB, disable the timer
+    #ifdef TIMER
+    disable_timer1();
+    #endif
     
     ihx_status = ihx_check_line(buff);
     
