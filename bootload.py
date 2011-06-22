@@ -33,15 +33,6 @@ def download_code(ihx_file, serial_port):
 def run_user_code(serial_port):
   # User code is entered on intel HEX EOF record
   serial_port.write(":00000001FF\n")
-  rc = serial_port.read()
-  print "RC =", rc,
-  if rc in bootloader_error_codes:
-    print "(%s)" % bootloader_error_codes[rc]
-  else:
-    print "(Unknown Error)"
-  if (rc != '0'):
-    print "Error running user code!"
-    return False
   return True
   
 def reset_bootloader(serial_port):
