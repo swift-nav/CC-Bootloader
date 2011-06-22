@@ -60,11 +60,16 @@
 uint8_t hex4(char c);
 uint8_t hex8(char s[]);
 uint16_t hex16(char s[]);
+char to_hex4_ascii(uint8_t x);
+void to_hex8_ascii(char buff[], uint8_t x);
+void to_hex16_ascii(char buff[], uint16_t x);
 
 uint8_t ihx_check_line(char line[]);
 void ihx_readline(char line[]);
 void ihx_write(char line[]);
 uint8_t ihx_record_type(char line[]);
+uint16_t ihx_record_address(char line[]);
 uint8_t ihx_data_byte(char line[], uint8_t n);
+void ihx_read_print(__xdata uint8_t* start_addr, uint16_t len);
 
 #endif // _INTEL_HEX_H_

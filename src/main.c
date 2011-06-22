@@ -20,6 +20,7 @@
 #include "cc1111.h"
 #include "main.h"
 #include "usb.h"
+#include "flash.h"
 #include "intel_hex.h"
 
 uint8_t bootloader_running = 1;
@@ -73,6 +74,7 @@ void bootloader_main ()
 {
   __xdata char buff[100];
   uint8_t ihx_status;
+  uint16_t read_start_addr, read_len;
   
   /*
   // Check for USB +5V, if not present go straight to user code
@@ -106,6 +108,8 @@ void bootloader_main ()
       switch (ihx_record_type(buff)) {
         case IHX_RECORD_DATA:
           ihx_write(buff);
+          usb_putchar('0');
+          usb_flush();
           break;
         case IHX_RECORD_EOF:
           usb_putstr("0\nJumping to user code\n");
@@ -118,14 +122,35 @@ void bootloader_main ()
           flash_reset();
           usb_putchar('0');
           usb_flush();
+          break;
+        case IHX_RECORD_ERASE_ALL:
+          // Erase all user flash pages
+          flash_erase_all_user();
+          usb_putchar('0');
+          usb_flush();
+          break;
+        case IHX_RECORD_ERASE_PAGE:
+          // Erase flash page
+          flash_erase_page(ihx_data_byte(buff, 0));
+          usb_putchar('0');
+          usb_flush();
+          break;
+        case IHX_RECORD_READ:
+          // Read out a section of flash over USB
+          read_start_addr = ihx_record_address(buff);
+          read_len = ihx_data_byte(buff, 0)<<8 + ihx_data_byte(buff, 1);
+          usb_putchar('\n');
+          ihx_read_print((__xdata uint8_t*)read_start_addr, read_len);
+          break;
         default:
           // Return the error code for unknown type in this case too
           usb_putchar(IHX_BAD_RECORD_TYPE + '0');
           usb_flush();
           break;
       }
+    } else {
+      usb_putchar(ihx_status + '0');
+      usb_flush();
     }
-    usb_putchar(ihx_status + '0');
-    usb_flush();
 	}
 }

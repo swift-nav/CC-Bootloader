@@ -48,6 +48,18 @@ uint16_t hex16(char s[]) {
   return hex8(&s[2]) + 256*(uint16_t)hex8(&s[0]);
 }
 
+uint8_t ihx_record_type(char line[]) {
+  return hex8(&line[7]);
+}
+
+uint16_t ihx_record_address(char line[]) {
+  return hex16(&line[3]);
+}
+
+uint8_t ihx_data_byte(char line[], uint8_t n) {
+  return hex8(&line[9 + n*2]);
+}
+
 uint8_t ihx_check_line(char line[]) {
   // :ccaaaattxxxxss
   uint8_t byte_count, record_type, checksum, sum, i;
@@ -57,8 +69,8 @@ uint8_t ihx_check_line(char line[]) {
     return IHX_INVALID;
   
   byte_count = hex8(&line[1]);
-  address = hex16(&line[3]);
-  record_type = hex8(&line[7]);
+  address = ihx_record_address(line);
+  record_type = ihx_record_type(line);
 
   if (byte_count > IHX_MAX_LEN)
     return IHX_RECORD_TOO_LONG;
@@ -68,8 +80,7 @@ uint8_t ihx_check_line(char line[]) {
   if (record_type > 0x01 && (record_type < 0x22 || record_type > 0x25))
     return IHX_BAD_RECORD_TYPE;
     
-  if ((record_type == IHX_RECORD_DATA || record_type == IHX_RECORD_READ) && \
-      (address < USER_CODE_BASE || address > FLASH_SIZE))
+  if (record_type == IHX_RECORD_DATA && (address < USER_CODE_BASE || address > FLASH_SIZE))
    return IHX_BAD_ADDRESS;
    
   sum = 0;
@@ -82,14 +93,6 @@ uint8_t ihx_check_line(char line[]) {
     return IHX_BAD_CHECKSUM;
     
   return IHX_OK;
-}
-
-uint8_t ihx_record_type(char line[]) {
-  return hex8(&line[7]);
-}
-
-uint8_t ihx_data_byte(char line[], uint8_t n) {
-  return hex8(&line[9 + n*2]);
 }
 
 void ihx_readline(char line[]) {
@@ -115,8 +118,8 @@ void ihx_write(char line[]) {
   __xdata uint8_t buff[65];
   
   byte_count = hex8(&line[1]);
-  address = hex16(&line[3]);
-  record_type = hex8(&line[7]);
+  address = ihx_record_address(line);
+  record_type = ihx_record_type(line);
   
   switch (record_type) {
     case IHX_RECORD_DATA:
@@ -139,6 +142,59 @@ void ihx_write(char line[]) {
     case IHX_RECORD_EOF:
       break;
   }
-
 }
 
+char to_hex4_ascii(uint8_t x) {
+  if (x <= 0x9)
+    return '0' + x;
+  if (x <= 0xF)
+    return 'A' + (x - 0xA);
+  return '!';
+}
+
+void to_hex8_ascii(char buff[], uint8_t x) {
+  buff[1] = to_hex4_ascii(x & 0xF);
+  buff[0] = to_hex4_ascii((x>>4) & 0xF);  
+}
+
+void to_hex16_ascii(char buff[], uint16_t x) {
+  to_hex8_ascii(&buff[2], x & 0xFF);
+  to_hex8_ascii(&buff[0], (x>>8) & 0xFF);  
+}
+
+void ihx_read_print(__xdata uint8_t* start_addr, uint16_t len) {
+  __xdata char buff[45];
+  uint8_t byte, sum, i;
+  
+  while (len >= 0x10) {
+    sum = 0;
+    
+    buff[0] = ':';
+    // Record length is 0x10
+    to_hex8_ascii(&buff[1], 0x10);
+    sum += 0x10;
+    // Write address into buffer
+    to_hex16_ascii(&buff[3], (uint16_t)start_addr);
+    sum += (uint16_t)start_addr & 0xFF;
+    sum += ((uint16_t)start_addr >> 8) & 0xFF;
+    // Write record type into buffer
+    to_hex8_ascii(&buff[7], 0x00);
+    // Write data bytes into buffer
+    for (i=0; i<0x10; i++) {
+      byte = *(start_addr+i);
+      sum += byte;
+      to_hex8_ascii(&buff[9 + 2*i], byte);
+    }
+    // Write checksum into buffer
+    to_hex8_ascii(&buff[41], (uint8_t)(-(int8_t)sum));
+    buff[43] = '\n';
+    buff[44] = 0;
+    
+    // Print buffer over usb
+    usb_putstr(buff);
+    
+    // Updates for next go round
+    start_addr += 0x10;
+    len -= 0x10;
+  }
+}
