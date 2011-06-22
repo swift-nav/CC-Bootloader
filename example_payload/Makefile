@@ -11,7 +11,7 @@ CFLAGS = --model-small --opt-code-speed
 # USER_CODE_BASE in the bootloader!
 LDFLAGS_FLASH = \
 	--out-fmt-ihx \
-	--code-loc 0x1000 --code-size 0x8000 \
+	--code-loc 0x1400 --code-size 0x8000 \
 	--xram-loc 0xf000 --xram-size 0x300 \
 	--iram-size 0x100
 
