@@ -221,7 +221,6 @@ void bootloader_main ()
           usb_flush();
           break;
         case IHX_RECORD_EOF:
-          usb_putstr("0\nJumping to user code\n");
           jump_to_user();
           break;
         case IHX_RECORD_RESET:
