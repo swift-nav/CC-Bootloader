@@ -58,13 +58,33 @@ void delay (unsigned char n) {
 			  nop();
 }
 
+uint8_t check_for_payload() {
+  if (*((__xdata uint8_t*)USER_CODE_BASE) == 0xFF)
+    return 0;
+  else
+    return 1;
+}
+
 void jump_to_user() {
   // Disable all interrupts
   EA = 0;
   IEN0 = IEN1 = IEN2 = 0;
   // Flag bootloader not running
   bootloader_running = 0;
-  // Jump to user code
+  
+  if (check_for_payload()) {
+    // Jump to user code
+    __asm
+      ljmp #USER_CODE_BASE
+    __endasm;
+    while (1) {}
+  } else {
+    // Oops, no payload. We're stuck now!
+    P1_1 = 1;
+    while (1) {}
+  }
+}
+
   __asm
     ljmp #USER_CODE_BASE
   __endasm;
