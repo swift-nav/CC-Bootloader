@@ -23,7 +23,7 @@
 // The address of the start of the user code section
 // This must be a multiple of 1kb to fit on a flash page boundary
 // !!! NOTE: at the moment you must also change this in start.asm IVT !!!
-#define USER_CODE_BASE (4*1024)
+#define USER_CODE_BASE (5*1024)
 #define USER_FIRST_PAGE (USER_CODE_BASE/1024)
 
 // Change to match the CC1111 part you are using

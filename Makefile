@@ -10,7 +10,7 @@ CFLAGS = --model-small --opt-code-speed
 
 LDFLAGS_FLASH = \
 	--out-fmt-ihx \
-	--code-loc 0x0000 --code-size 0x1000 \
+	--code-loc 0x0000 --code-size 0x1400 \
 	--xram-loc 0xf000 --xram-size 0x300 \
 	--iram-size 0x100
 
