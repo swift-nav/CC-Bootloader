@@ -197,4 +197,5 @@ void ihx_read_print(__xdata uint8_t* start_addr, uint16_t len) {
     start_addr += 0x10;
     len -= 0x10;
   }
+  usb_putstr(":00000001FF\n");
 }

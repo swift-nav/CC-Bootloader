@@ -92,8 +92,10 @@ def flash_read(serial_port, start_addr, length):
             (0x100 - ((length>>8) & 0xFF))
            ) & 0xFF
   serial_port.write(":02%04X25%04X%02X\n" % (start_addr, length, chksum))
-  lines = serial_port.readlines()
-  print ''.join(lines)
+  for line in serial_port:
+    print line,
+    if (line == ":00000001FF\n"):
+      break
 
 def print_usage():
   import sys
