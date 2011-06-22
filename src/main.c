@@ -149,14 +149,14 @@ void timer1_isr_forward() __naked {
   	jnz	timer1_isr_forward_bootloader
   	; Bootloader not running, jump into the payload ISR
   	pop acc
-  	ljmp #(0x1400+0x4B)
+  	ljmp #(USER_CODE_BASE+0x4B)
   timer1_isr_forward_bootloader:
   	pop acc
   	ljmp	_timer1_isr
   __endasm;
   #else
   __asm
-  	ljmp #(0x1400+0x4B)
+  	ljmp #(USER_CODE_BASE+0x4B)
   __endasm;  
   #endif
 }
