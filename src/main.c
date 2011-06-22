@@ -20,6 +20,7 @@
 #include "cc1111.h"
 #include "main.h"
 #include "usb.h"
+#include "hal.h"
 #include "flash.h"
 #include "intel_hex.h"
 
@@ -71,8 +72,7 @@ void jump_to_user() {
   IEN0 = IEN1 = IEN2 = 0;
   
   // Bring down the USB link
-  P1_0 = 0;
-  P1DIR &= ~1;
+  usb_down();
   
   // Flag bootloader not running
   bootloader_running = 0;
@@ -85,7 +85,7 @@ void jump_to_user() {
     while (1) {}
   } else {
     // Oops, no payload. We're stuck now!
-    P1_1 = 1;
+    led_on();
     while (1) {}
   }
 }
@@ -187,9 +187,7 @@ void bootloader_main ()
   
   clock_init();
   
-  // Setup LED and turn it off
-  P1DIR |= 2;
-  P1_1 = 0;
+  setup_led();
   
   // Setup timer if enabled
   #ifdef TIMER
@@ -202,8 +200,7 @@ void bootloader_main ()
 	EA = 1;
   
   // Bring up the USB link
-	P1DIR |= 1;
-	P1_0 = 1;
+  usb_up();
   
   while (1) 
   {

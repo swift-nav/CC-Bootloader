@@ -25,6 +25,7 @@ SRC = \
 	src/usb.c \
 	src/flash.c \
 	src/intel_hex.c \
+	src/hal.c \
 	src/usb_descriptors.c 
 
 ASM_SRC = src/start.asm

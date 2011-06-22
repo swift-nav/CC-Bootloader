@@ -90,5 +90,9 @@ If you want the bootloader to only be invoked under certain conditions, e.g.
 the presence of USB power then please modify the `want_bootloader` function
 in `main.c`
 
+All the board specific code is in `hal.c` so make sure to take a look at that
+if you are porting the code to a new board.
+
+
 
 
