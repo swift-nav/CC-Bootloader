@@ -45,7 +45,7 @@ ASM_REL = $(ASM_SRC:.asm=.rel)
 ASM_RST = $(ASM_SRC:.asm=.rst)
 ASM_SYM = $(ASM_SRC:.asm=.sym)
 
-PROGS = CCBootloader.hex
+PROGS = CCBootloader.hex CCBootloader-rfcat-chronosdongle.hex CCBootloader-rfcat-donsdongle.hex
 PCDB = $(PROGS:.hex=.cdb)
 PLNK = $(PROGS:.hex=.lnk)
 PMAP = $(PROGS:.hex=.map)
@@ -63,8 +63,31 @@ all: $(PROGS)
 CCBootloader.hex: $(REL) $(ASM_REL) Makefile
 	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader.hex $(ASM_REL) $(REL)
 
+CCBootloader-rfcat-chronosdongle.hex: CFLAGS += -DRFCAT -DRFCAT_CHRONOS
+CCBootloader-rfcat-chronosdongle.hex: $(REL) $(ASM_REL) Makefile
+	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader-rfcat-chronosdongle.hex $(ASM_REL) $(REL)
+
+CCBootloader-rfcat-donsdongle.hex: CFLAGS += -DRFCAT -DRFCAT_DONSDONGLE
+CCBootloader-rfcat-donsdongle.hex: $(REL) $(ASM_REL) Makefile
+	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader-rfcat-donsdongle.hex $(ASM_REL) $(REL)
+
 clean:
 	rm -f $(ADB) $(ASM) $(LNK) $(LST) $(REL) $(RST) $(SYM)
 	rm -f $(ASM_ADB) $(ASM_LNK) $(ASM_LST) $(ASM_REL) $(ASM_RST) $(ASM_SYM)
 	rm -f $(PROGS) $(PCDB) $(PLNK) $(PMAP) $(PMEM) $(PAOM)
+
+install: CCBootloader.hex
+	goodfet.cc erase
+	goodfet.cc flash CCBootloader.hex
+	goodfet.cc verify CCBootloader.hex
+
+installchronosdongle: CCBootloader-rfcat-chronosdongle.hex
+	goodfet.cc erase
+	goodfet.cc flash CCBootloader-rfcat-chronosdongle.hex
+	goodfet.cc verify CCBootloader-rfcat-chronosdongle.hex
+
+installdonsdongle: CCBootloader-rfcat-donsdongle.hex
+	goodfet.cc erase
+	goodfet.cc flash CCBootloader-rfcat-donsdongle.hex
+	goodfet.cc verify CCBootloader-rfcat-donsdongle.hex
 

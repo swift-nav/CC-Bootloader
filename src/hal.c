@@ -18,29 +18,39 @@
  */
 
 #include "cc1111.h"
+#include "hal.h"
 
 void setup_led() {
   // Setup LED and turn it off
-  P1DIR |= 2;
-  P1_1 = 0;
+  P1DIR |= LED_MASK;
+  LED = 0;
+}
+
+void setup_button() {
+  #ifdef RFCAT_DONSDONGLE
+  P1DIR &= ~4;
+  #endif
+  #ifdef RFCAT_CHRONOS
+  P2DIR &= ~4;
+  #endif
 }
 
 void led_on() {
-  P1_1 = 1;
+  LED = 1;
 }
 
 void led_off() {
-  P1_1 = 0;
+  LED = 0;
 }
 
 void usb_up() {
   // Bring up the USB link
-	P1DIR |= 1;
-	P1_0 = 1;
+  P1DIR |= USB_MASK;
+  USB_ENABLE = 1;
 }
 
 void usb_down() {
   // Bring down the USB link
-  P1_0 = 0;
-  P1DIR &= ~1;
+  USB_ENABLE = 0;
+  P1DIR &= ~USB_MASK;
 }
