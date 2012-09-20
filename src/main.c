@@ -275,7 +275,7 @@ void bootloader_main ()
         case IHX_RECORD_READ:
           // Read out a section of flash over USB
           read_start_addr = ihx_record_address(buff);
-          read_len = ihx_data_byte(buff, 0)<<8 + ihx_data_byte(buff, 1);
+          read_len = (ihx_data_byte(buff, 0)<<8) + ihx_data_byte(buff, 1);
           usb_putchar('\n');
           ihx_read_print((__xdata uint8_t*)read_start_addr, read_len);
           break;
