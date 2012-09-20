@@ -54,7 +54,7 @@ def verify_code(ihx_file, serial_port):
         print '(OK)',
       else:
         print 'Failed! Expected:', data, 'Got:', verify_data[offset*2:(offset*2)+(length*2)]
-        exit(0)
+        exit(1)
       sys.stdout.flush()
     else:
       print "Skipping non data record: '%s'" % line[:-1]
