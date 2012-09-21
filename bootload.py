@@ -118,9 +118,10 @@ def do_flash_read(serial_port, start_addr, length):
 def flash_read(serial_port, start_addr, length):
   do_flash_read(serial_port, start_addr, length)
   for line in serial_port:
-    print line,
-    if (line == ":00000001FF\n"):
-      break
+    if not line == "\n":
+        print line,
+        if (line == ":00000001FF\n"):
+          break
 
 def print_usage():
   import sys
@@ -130,13 +131,17 @@ CC Bootloader Download Utility
 Usage:  ./bootload.py serial_port command
 
 Commands:
-  download hex_file
+
+  download <hex_file>
+
     Download hex_file to the device.
     
   run
+
     Run the user code.
     
   reset
+
     The bootloader will not erase pages that have previously been written to
     before writing new data to that page. This allows for random access writes
     but prevents you from overwriting downloaded code unless the device is
@@ -145,20 +150,25 @@ Commands:
     cycling.
     
   erase_all
+
     Erases the entire user flash area.
     
-  erage n
+  erage <n>
+
     Erases page n of the flash memory (organised into 1024 byte pages). The
     bootloader occupies the first few pages and the rest are reserved for user
     code. Attempting to erase a bootloader page will have no effect. To
     determine which page the user code starts on please check the
     USER_CODE_BASE setting in main.h.
     
-  read start_addr len
-    Reads len bytes from flash memory starting from start_addr. start_addr and
-    len should be specified in hexadecimal (e.g. 0x1234).
+  read <start_addr> <len>
 
-  verify hex_file
+    Reads len bytes from flash memory starting from start_addr. start_addr and
+    len should be specified in hexadecimal (e.g. 0x1234) and must be a multiple
+    of 16. Output is compatible with download and verify commands.
+
+  verify <hex_file>
+
     Verify hex_file matches device flash memory.
   """
 
