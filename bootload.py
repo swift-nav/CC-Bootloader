@@ -164,7 +164,7 @@ Commands:
   read <start_addr> <len>
 
     Reads len bytes from flash memory starting from start_addr. start_addr and
-    len should be specified in hexadecimal (e.g. 0x1234) and must be a multiple
+    len should be specified in hexadecimal (e.g. 0x1234) and len must be a multiple
     of 16. Output is compatible with download and verify commands.
 
   verify <hex_file>
