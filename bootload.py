@@ -37,12 +37,10 @@ def verify_code(ihx_file, serial_port):
       length= int(line[1:3], 16)
       start_addr= int(line[3:7], 16)
       data= line[9:9+(length*2)]
-      # we can only read 16 byte chunks on 16 byte boundries
-      block_start= (start_addr / 16) * 16
-      offset= (start_addr - block_start)
-      block_length= (((length + offset) / 16) + 1) * 16
+      # we can only read 16 byte chunks
+      block_length= ((length / 16) + 1) * 16
       print "\rVerifying %04d bytes at address: %04X" % (length, start_addr),
-      do_flash_read(serial_port, block_start, block_length)
+      do_flash_read(serial_port, start_addr, block_length)
       verify_data= ''
       for read_data in serial_port:
         read_data= read_data.strip()
@@ -50,10 +48,10 @@ def verify_code(ihx_file, serial_port):
             break
         # strip header and checksum
         verify_data += read_data[9:-2]
-      if (data == verify_data[offset*2:(offset*2)+(length*2)]):
+      if (data == verify_data[:length*2]):
         print '(OK)',
       else:
-        print 'Failed! Expected:', data, 'Got:', verify_data[offset*2:(offset*2)+(length*2)]
+        print 'Failed! Expected:', data, 'Got:', verify_data[:length*2]
         exit(1)
       sys.stdout.flush()
     else:
