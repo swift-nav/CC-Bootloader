@@ -215,11 +215,11 @@ void bootloader_main ()
   if (CC1111YSONE_PIN_DC != GROUNDED && !want_bootloader())
   #endif
 
-  #else
+#else
   if (!want_bootloader())
-  #endif
+#endif
     jump_to_user();
-  #ifdef RFCAT
+#ifdef RFCAT
   // reset semaphore 
   I2SCLKF2= 0x00;
 #endif

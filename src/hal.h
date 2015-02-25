@@ -20,13 +20,6 @@
 #ifndef _HAL_H_
 #define _HAL_H_
 
-// enable RFCAT and dongle version to build custom RFCAT version
-// http://code.google.com/p/rfcat/
-// this would normally be done in the Makefile
-//#define RFCAT
-//#define RFCAT_DONSDONGLE
-//#define RFCAT_CHRONOS
-
 #ifdef RFCAT_CHRONOS
   #define LED 			P1_0
   #define LED_MASK		1
@@ -43,7 +36,7 @@
   #define CC1111EM_BUTTON 	P1_2
 #endif
 
-#ifdef RFCAT_YARDSTICK1
+#ifdef RFCAT_YARDSTICKONE
   #define LED1 			P1_1
   #define LED2 			P1_2
   #define LED3 			P1_3

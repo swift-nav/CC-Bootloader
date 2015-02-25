@@ -142,7 +142,7 @@ struct usb_line_coding {
   #define USB_iProduct_LEN 0x20
   #define USB_iProduct_STRING "Dons Bootloader"
   #define USB_iProduct_UCS2 'D', 0, 'o', 0, 'n', 0, 's', 0, ' ', 0, 'B', 0, 'o', 0, 'o', 0, 't', 0, 'l', 0, 'o', 0, 'a', 0, 'd', 0, 'e', 0, 'r', 0
-#elif defined RFCAT_YARDSTICK1
+#elif defined RFCAT_YARDSTICKONE
   #define USB_VID 0x1D50
   #define USB_PID 0x605C
   // iManufacturer

@@ -33,7 +33,7 @@ void setup_button() {
 #ifdef RFCAT_CHRONOS
   P2DIR &= ~4;
 #endif
-#ifdef RFCAT_YARDSTICK1
+#ifdef RFCAT_YARDSTICKONE
   P2DIR &= ~4;
   // amplifer configuration pins
   P2DIR |= 0x19;
@@ -44,7 +44,7 @@ void setup_button() {
 }
 
 void led_on() {
-#ifdef RFCAT_YARDSTICK1
+#ifdef RFCAT_YARDSTICKONE
   LED1 = 1;
   LED2 = 1;
   LED3 = 1;
@@ -54,7 +54,7 @@ void led_on() {
 }
 
 void led_off() {
-#ifdef RFCAT_YARDSTICK1
+#ifdef RFCAT_YARDSTICKONE
   LED1 = 0;
   LED2 = 0;
   LED3 = 0;

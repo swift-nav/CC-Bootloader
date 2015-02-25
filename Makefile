@@ -71,7 +71,7 @@ CCBootloader-rfcat-donsdongle.hex: CFLAGS += -DRFCAT -DRFCAT_DONSDONGLE
 CCBootloader-rfcat-donsdongle.hex: $(REL) $(ASM_REL) Makefile
 	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader-rfcat-donsdongle.hex $(ASM_REL) $(REL)
 
-CCBootloader-rfcat-ys1.hex: CFLAGS += -DRFCAT -DRFCAT_YARDSTICK1
+CCBootloader-rfcat-ys1.hex: CFLAGS += -DRFCAT -DRFCAT_YARDSTICKONE
 CCBootloader-rfcat-ys1.hex: $(REL) $(ASM_REL) Makefile
 	$(CC) $(LDFLAGS_FLASH) $(CFLAGS) -o CCBootloader-rfcat-ys1.hex $(ASM_REL) $(REL)
 
