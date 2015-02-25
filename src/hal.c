@@ -23,24 +23,44 @@
 void setup_led() {
   // Setup LED and turn it off
   P1DIR |= LED_MASK;
-  LED = 0;
+  led_off();
 }
 
 void setup_button() {
-  #ifdef RFCAT_DONSDONGLE
+#ifdef RFCAT_DONSDONGLE
   P1DIR &= ~4;
-  #endif
-  #ifdef RFCAT_CHRONOS
+#endif
+#ifdef RFCAT_CHRONOS
   P2DIR &= ~4;
-  #endif
+#endif
+#ifdef RFCAT_YARDSTICK1
+  P2DIR &= ~4;
+  // amplifer configuration pins
+  P2DIR |= 0x19;
+  TX_AMP_EN = 0;
+  RX_AMP_EN = 0;
+  AMP_BYPASS_EN = 1;
+#endif
 }
 
 void led_on() {
+#ifdef RFCAT_YARDSTICK1
+  LED1 = 1;
+  LED2 = 1;
+  LED3 = 1;
+#else
   LED = 1;
+#endif
 }
 
 void led_off() {
+#ifdef RFCAT_YARDSTICK1
+  LED1 = 0;
+  LED2 = 0;
+  LED3 = 0;
+#else
   LED = 0;
+#endif
 }
 
 void usb_up() {

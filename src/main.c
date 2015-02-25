@@ -196,14 +196,25 @@ void bootloader_main ()
   uint8_t ihx_status;
   uint16_t read_start_addr, read_len;
 
-  #ifdef RFCAT
+#ifdef RFCAT
   // use I2S SFR to signal that bootloader is present
   I2SCLKF0= 0xF0;
   I2SCLKF1= 0x0D;
 
   setup_button();
 
-  if (CC1111EM_BUTTON != BUTTON_PRESSED && CC1111CHRONOS_PIN_DC != GROUNDED && !want_bootloader())
+  #ifdef RFCAT_DONSDONGLE
+  if (CC1111EM_BUTTON != BUTTON_PRESSED && !want_bootloader())
+  #endif
+
+  #ifdef RFCAT_CHRONOS
+  if (CC1111CHRONOS_PIN_DC != GROUNDED && !want_bootloader())
+  #endif
+
+  #ifdef RFCAT_YARDSTICKONE
+  if (CC1111YSONE_PIN_DC != GROUNDED && !want_bootloader())
+  #endif
+
   #else
   if (!want_bootloader())
   #endif
@@ -211,7 +222,7 @@ void bootloader_main ()
   #ifdef RFCAT
   // reset semaphore 
   I2SCLKF2= 0x00;
-  #endif
+#endif
 
   clock_init();
   
