@@ -142,6 +142,17 @@ struct usb_line_coding {
   #define USB_iProduct_LEN 0x20
   #define USB_iProduct_STRING "Dons Bootloader"
   #define USB_iProduct_UCS2 'D', 0, 'o', 0, 'n', 0, 's', 0, ' ', 0, 'B', 0, 'o', 0, 'o', 0, 't', 0, 'l', 0, 'o', 0, 'a', 0, 'd', 0, 'e', 0, 'r', 0
+#elif defined RFCAT_YARDSTICK1
+  #define USB_VID 0x1D50
+  #define USB_PID 0x605C
+  // iManufacturer
+  #define USB_iManufacturer_LEN 0x28
+  #define USB_iManufacturer_STRING "Great Scott Gadgets"
+  #define USB_iManufacturer_UCS2 'G', 0, 'r', 0, 'e', 0, 'a', 0, 't', 0, ' ', 0, 'S', 0, 'c', 0, 'o', 0, 't', 0, 't', 0, ' ', 0, 'G', 0, 'a', 0, 'd', 0, 'g', 0, 'e', 0, 't', 0, 's', 0
+  // iProduct
+  #define USB_iProduct_LEN 0x34
+  #define USB_iProduct_STRING "YARD Stick One Bootloader"
+  #define USB_iProduct_UCS2 'Y', 0, 'A', 0, 'R', 0, 'D', 0, ' ', 0, 'S', 0, 't', 0, 'i', 0, 'c', 0, 'k', 0, ' ', 0, 'O', 0, 'n', 0, 'e', 0, ' ', 0, 'B', 0, 'o', 0, 'o', 0, 't', 0, 'l', 0, 'o', 0, 'a', 0, 'd', 0, 'e', 0, 'r', 0
 #else
   #define USB_VID 0xFFFE
   #define USB_PID 0x000A
