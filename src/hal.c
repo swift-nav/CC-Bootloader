@@ -18,29 +18,69 @@
  */
 
 #include "cc1111.h"
+#include "hal.h"
 
 void setup_led() {
   // Setup LED and turn it off
-  P1DIR |= 2;
-  P1_1 = 0;
+  P1DIR |= LED_MASK;
+  led_off();
+}
+
+void setup_button() {
+#ifdef RFCAT_DONSDONGLE
+  P1DIR &= ~4;
+#endif
+#ifdef RFCAT_CHRONOS
+  P2DIR &= ~4;
+#endif
+#ifdef RFCAT_YARDSTICKONE
+  P2DIR &= ~4;
+#endif
+}
+
+// any other gpio pins
+void setup_gpio() {
+#ifdef RFCAT_YARDSTICKONE
+  // amplifer configuration pins
+  //P0_0 input with pull-up (antenna port power off)
+  P0DIR &= ~1; // Set direction to IN (clear bit for P0_0)
+  P0INP &= ~P0INP_MDP0_0_TRISTATE;  // Set as pull up/down (rather than tristate)
+  P2INP &= ~P2INP_PDUP0_PULL_DOWN; // clear pull down bit (i.e. pull up)
+  P2DIR |= 0x19;
+  TX_AMP_EN = 0;
+  RX_AMP_EN = 0;
+  AMP_BYPASS_EN = 1;
+#endif
 }
 
 void led_on() {
-  P1_1 = 1;
+#ifdef RFCAT_YARDSTICKONE
+  LED1 = 1;
+  LED2 = 1;
+  LED3 = 1;
+#else
+  LED = 1;
+#endif
 }
 
 void led_off() {
-  P1_1 = 0;
+#ifdef RFCAT_YARDSTICKONE
+  LED1 = 0;
+  LED2 = 0;
+  LED3 = 0;
+#else
+  LED = 0;
+#endif
 }
 
 void usb_up() {
   // Bring up the USB link
-	P1DIR |= 1;
-	P1_0 = 1;
+  P1DIR |= USB_MASK;
+  USB_ENABLE = 1;
 }
 
 void usb_down() {
   // Bring down the USB link
-  P1_0 = 0;
-  P1DIR &= ~1;
+  USB_ENABLE = 0;
+  P1DIR &= ~USB_MASK;
 }

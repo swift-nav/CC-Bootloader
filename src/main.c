@@ -71,22 +71,26 @@ void jump_to_user() {
   EA = 0;
   IEN0 = IEN1 = IEN2 = 0;
   
-  // Bring down the USB link
-  usb_down();
-  
-  // Flag bootloader not running
-  bootloader_running = 0;
   
   if (check_for_payload()) {
+    // Bring down the USB link
+    usb_down();
+  
+    // Flag bootloader not running
+    bootloader_running = 0;
     // Jump to user code
     __asm
       ljmp #USER_CODE_BASE
     __endasm;
     while (1) {}
   } else {
+    #ifdef RFCAT
+    return; // need to run bootloader!
+    #else
     // Oops, no payload. We're stuck now!
     led_on();
     while (1) {}
+    #endif
   }
 }
 
@@ -172,8 +176,18 @@ uint8_t want_bootloader() {
   if (!Px_y)
     return 0;
   */
-  
+
+  #ifdef RFCAT 
+  // we use the unused I2S SFRs as semaphores.
+  // this would be safe even if I2S is in use as they should be reconfigured by 
+  // user code 
+  if(I2SCLKF2 == 0x69) 
+    return 1;
+  // no thanks
+  return 0;
+  #else
   return 1;
+  #endif
 }
 
 void bootloader_main ()
@@ -181,10 +195,36 @@ void bootloader_main ()
   __xdata char buff[100];
   uint8_t ihx_status;
   uint16_t read_start_addr, read_len;
-  
+
+#ifdef RFCAT
+  // use I2S SFR to signal that bootloader is present
+  I2SCLKF0= 0xF0;
+  I2SCLKF1= 0x0D;
+
+  setup_button();
+  setup_gpio();
+
+  #ifdef RFCAT_DONSDONGLE
+  if (CC1111EM_BUTTON != BUTTON_PRESSED && !want_bootloader())
+  #endif
+
+  #ifdef RFCAT_CHRONOS
+  if (CC1111CHRONOS_PIN_DC != GROUNDED && !want_bootloader())
+  #endif
+
+  #ifdef RFCAT_YARDSTICKONE
+  if (CC1111YSONE_PIN_DC != GROUNDED && !want_bootloader())
+  #endif
+
+#else
   if (!want_bootloader())
+#endif
     jump_to_user();
-  
+#ifdef RFCAT
+  // reset semaphore 
+  I2SCLKF2= 0x00;
+#endif
+
   clock_init();
   
   setup_led();
@@ -197,11 +237,12 @@ void bootloader_main ()
   usb_init();
   
   // Enable interrupts
-	EA = 1;
+  EA = 1;
   
   // Bring up the USB link
   usb_up();
-  
+  led_on();
+ 
   while (1) 
   {
     ihx_readline(buff);
@@ -246,7 +287,7 @@ void bootloader_main ()
         case IHX_RECORD_READ:
           // Read out a section of flash over USB
           read_start_addr = ihx_record_address(buff);
-          read_len = ihx_data_byte(buff, 0)<<8 + ihx_data_byte(buff, 1);
+          read_len = (ihx_data_byte(buff, 0)<<8) + ihx_data_byte(buff, 1);
           usb_putchar('\n');
           ihx_read_print((__xdata uint8_t*)read_start_addr, read_len);
           break;
@@ -259,6 +300,6 @@ void bootloader_main ()
     } else {
       usb_putchar(ihx_status + '0');
       usb_flush();
-    }
-	}
+      }
+  }
 }

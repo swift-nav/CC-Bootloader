@@ -164,15 +164,18 @@ void to_hex16_ascii(char buff[], uint16_t x) {
 
 void ihx_read_print(__xdata uint8_t* start_addr, uint16_t len) {
   __xdata char buff[45];
-  uint8_t byte, sum, i;
+  uint8_t byte, sum, i, chunk;
   
-  while (len >= 0x10) {
+  while (len) {
     sum = 0;
+    if(len > 0x10)
+      chunk = 0x10;
+    else
+      chunk = len;
     
     buff[0] = ':';
-    // Record length is 0x10
-    to_hex8_ascii(&buff[1], 0x10);
-    sum += 0x10;
+    to_hex8_ascii(&buff[1], chunk);
+    sum += chunk;
     // Write address into buffer
     to_hex16_ascii(&buff[3], (uint16_t)start_addr);
     sum += (uint16_t)start_addr & 0xFF;
@@ -180,22 +183,25 @@ void ihx_read_print(__xdata uint8_t* start_addr, uint16_t len) {
     // Write record type into buffer
     to_hex8_ascii(&buff[7], 0x00);
     // Write data bytes into buffer
-    for (i=0; i<0x10; i++) {
+    for (i=0; i<chunk; i++) {
       byte = *(start_addr+i);
       sum += byte;
       to_hex8_ascii(&buff[9 + 2*i], byte);
     }
     // Write checksum into buffer
-    to_hex8_ascii(&buff[41], (uint8_t)(-(int8_t)sum));
-    buff[43] = '\n';
-    buff[44] = 0;
+    to_hex8_ascii(&buff[9 + 2*i], (uint8_t)(-(int8_t)sum));
+    buff[11 + 2*i] = '\n';
+    buff[12 + 2*i] = 0;
     
     // Print buffer over usb
     usb_putstr(buff);
     
     // Updates for next go round
-    start_addr += 0x10;
-    len -= 0x10;
+    if(len > 0x10) {
+      start_addr += 0x10;
+      len -= 0x10;
+    } else // we're done
+      len = 0;
   }
   usb_putstr(":00000001FF\n");
 }
