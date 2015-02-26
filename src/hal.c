@@ -35,7 +35,17 @@ void setup_button() {
 #endif
 #ifdef RFCAT_YARDSTICKONE
   P2DIR &= ~4;
+#endif
+}
+
+// any other gpio pins
+void setup_gpio() {
+#ifdef RFCAT_YARDSTICKONE
   // amplifer configuration pins
+  //P0_0 input with pull-up (antenna port power off)
+  P0DIR &= ~1; // Set direction to IN (clear bit for P0_0)
+  P0INP &= ~P0INP_MDP0_0_TRISTATE;  // Set as pull up/down (rather than tristate)
+  P2INP &= ~P2INP_PDUP0_PULL_DOWN; // clear pull down bit (i.e. pull up)
   P2DIR |= 0x19;
   TX_AMP_EN = 0;
   RX_AMP_EN = 0;

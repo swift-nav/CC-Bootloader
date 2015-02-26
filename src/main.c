@@ -202,6 +202,7 @@ void bootloader_main ()
   I2SCLKF1= 0x0D;
 
   setup_button();
+  setup_gpio();
 
   #ifdef RFCAT_DONSDONGLE
   if (CC1111EM_BUTTON != BUTTON_PRESSED && !want_bootloader())
