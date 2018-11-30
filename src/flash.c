@@ -27,7 +27,7 @@ uint32_t erased_page_flags = 0;
 
 void flash_erase_page(uint8_t page) {
   // Don't let's erase the bootloader, please
-  if (page < USER_FIRST_PAGE)
+  if ((page < USER_FIRST_PAGE) || (page >= FLASH_PAGES))
     return;
   
   // Waiting for the flash controller to be ready
