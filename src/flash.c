@@ -149,10 +149,12 @@ void flash_check_and_erase(uint8_t page) {
 }
 
 void flash_check_erase_and_write(uint16_t buff[], uint16_t len, uint16_t flash_addr) {
+  // NOTE: len is the number of 16-bit words to transfer
+
   uint8_t i, start_page, end_page;
   
   start_page = flash_addr / 1024;
-  end_page = (flash_addr + len) / 1024;
+  end_page = (flash_addr + (2 * len) - 1) / 1024;
   
   // Check and erase pages in range
   for (i=start_page; i<=end_page; i++)
