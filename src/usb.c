@@ -234,7 +234,7 @@ static void usb_ep0_setup()
       }
       break;
   }
-  if (usb_ep0_state != USB_EP0_DATA_OUT) {
+  if (usb_ep0_state == USB_EP0_DATA_IN) {
     if (usb_setup.length < usb_ep0_in_len)
       usb_ep0_in_len = usb_setup.length;
     usb_ep0_flush();
