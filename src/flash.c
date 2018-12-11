@@ -27,7 +27,7 @@ uint32_t erased_page_flags = 0;
 
 void flash_erase_page(uint8_t page) {
   // Don't let's erase the bootloader, please
-  if (page < USER_FIRST_PAGE)
+  if ((page < USER_FIRST_PAGE) || (page >= FLASH_PAGES))
     return;
   
   // Waiting for the flash controller to be ready
@@ -149,10 +149,12 @@ void flash_check_and_erase(uint8_t page) {
 }
 
 void flash_check_erase_and_write(uint16_t buff[], uint16_t len, uint16_t flash_addr) {
+  // NOTE: len is the number of 16-bit words to transfer
+
   uint8_t i, start_page, end_page;
   
   start_page = flash_addr / 1024;
-  end_page = (flash_addr + len) / 1024;
+  end_page = (flash_addr + (2 * len) - 1) / 1024;
   
   // Check and erase pages in range
   for (i=start_page; i<=end_page; i++)
